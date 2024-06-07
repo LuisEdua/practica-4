@@ -8,11 +8,21 @@ pipeline {
 
   stages {
     stage('Limpiar Contenedores') {
-            steps {
-                    sh 'docker stop $(docker ps -q)'
-            }
+      steps {
+        script {
+          sh '''
+          CONTAINERS=$(docker ps -q)
+          if [ ! -z "$CONTAINERS" ]; then
+              docker stop $CONTAINERS
+          else
+              echo "No hay contenedores en ejecución."
+          fi
+          '''
         }
-    stage ('Build') {
+      }
+    }
+
+    stage('Build') {
       steps {
         script {
           docker.build(DOCKERIMAGE)
@@ -20,7 +30,7 @@ pipeline {
       }
     }
 
-    stage ('Test') {
+    stage('Test') {
       steps {
         script {
           docker.image(DOCKERIMAGE).inside {
@@ -30,7 +40,8 @@ pipeline {
         }
       }
     }
-    stage ('Deploy') {
+
+    stage('Deploy') {
       steps {
         script {
           docker.image(DOCKERIMAGE).run('-d -p 3000:3000')
