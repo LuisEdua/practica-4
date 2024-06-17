@@ -44,7 +44,7 @@ pipeline {
     stage('Deploy') {
       steps {
         script {
-          docker.image(DOCKERIMAGE).run('-d -p 3000:3000')
+          docker.image(DOCKERIMAGE).run('-d --restart unless-stopped -p 3000:3000')
         }
       }
     }
